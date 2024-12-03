@@ -7,5 +7,4 @@ pymongo
 nltk
 python-dotenv
 gunicorn
-dotenv
 waitress
