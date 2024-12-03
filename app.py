@@ -13,12 +13,12 @@ def search():
     if not prompt:
         return jsonify({"error": "No prompt provided"}), 400
 
-    # Find related data based on the user's prompt
     related_data = find_related_data(prompt)
 
-    # Limit the results to the top 5 most relevant entries
     return jsonify({"related_data": related_data[:5]})
 
 
 if __name__ == "__main__":
-    app.run(debug=False, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    from waitress import serve
+
+    serve(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
