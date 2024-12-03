@@ -3,12 +3,14 @@ import os
 from dotenv import load_dotenv
 import re
 
+# Environment variables
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
 
-client = MongoClient(MONGO_URI, maxPoolSize=10, tls=True)
-db = client.related_law_finder
-laws_collection = db.laws
+
+# Avoid creating the client globally
+def get_db_client():
+    return MongoClient(MONGO_URI, maxPoolSize=10, tls=True)
 
 
 def extract_keywords(prompt):
@@ -19,12 +21,16 @@ def extract_keywords(prompt):
 
 def find_related_data(prompt):
     try:
+        # Create a new client for each request
+        client = get_db_client()
+        db = client.related_law_finder
+        laws_collection = db.laws
+
         keywords = extract_keywords(prompt)
         if not keywords:
             return []
 
         search_query = " ".join(keywords)
-
         pipeline = [
             {
                 "$search": {
