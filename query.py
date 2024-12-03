@@ -3,12 +3,10 @@ import os
 from dotenv import load_dotenv
 import re
 
-# Environment variables
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
 
 
-# Avoid creating the client globally
 def get_db_client():
     return MongoClient(MONGO_URI, maxPoolSize=10, tls=True)
 
@@ -21,16 +19,18 @@ def extract_keywords(prompt):
 
 def find_related_data(prompt):
     try:
-        # Create a new client for each request
         client = get_db_client()
         db = client.related_law_finder
         laws_collection = db.laws
 
         keywords = extract_keywords(prompt)
         if not keywords:
+            print("No keywords extracted.")
             return []
 
         search_query = " ".join(keywords)
+        print(f"Search Query: {search_query}")
+
         pipeline = [
             {
                 "$search": {
@@ -53,8 +53,12 @@ def find_related_data(prompt):
             {"$project": {"title": 1, "url": 1, "date": 1, "score": 1, "_id": 0}},
         ]
 
+        print(f"Pipeline: {pipeline}")
+
         results = laws_collection.aggregate(pipeline)
-        return list(results)
+        related_data = list(results)
+        print(f"Related Data: {related_data}")
+        return related_data
 
     except Exception as e:
         print(f"Error querying the database: {e}")
